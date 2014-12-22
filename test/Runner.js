@@ -32,36 +32,26 @@ suite('Runner',function() {
         "TestDirectory should be a directory");
       done()
     }),
-    test('getTestCollections: Should return an array of arrays of filenames',
+    test('getTestCollections: Should return an array of arrays of test filenames',
       function(done) {
         const suites = 
           Runner.getTestCollections(Runner.config.TestDirectory);
+
         assert.ok(
           suites instanceof Array,
           "getTestCollections should return an array");
+
         _.each(suites,
           function(suiteFiles) {
             assert.ok(
               suiteFiles instanceof Array);
+            _.each(suiteFiles, function(filename) {
+              assert.ok(/test/.test(filename),
+                "all test filenames should contain the word 'test' ");
+            })
           });
         done();
-      }),
-    test('readSuiteIntoRunnables: Should return \n'+
-      'an array of functions', function(done) {
-        const runnables = 
-          Runner.readSuiteIntoRunnables(
-            sampleSuiteThatDoesNothing);
-          
-        assert.ok( runnables instanceof Array,
-          "readSuiteIntoRunnables should return an Array" );
-
-        _.each(runnables, function(runnable) {
-          assert.ok( runnable.execute instanceof Function,
-            "runnable should be a function");
-        })
-
       })
-
   });
 
   teardown(function() {

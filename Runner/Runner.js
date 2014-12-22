@@ -8,56 +8,51 @@ var Config = {
   "TestDirectory" : path.join(__dirname, '../Tests')
 }
 
-function getTestCollections( suitePath ) {
-  const suiteDirs = fs.readdirSync(suitePath)
-  return _.map(suiteDirs, function(dir) {
-  	return fs.readdirSync(
-  		path.join( Config.TestDirectory, dir));
-  });
+function readTestFilenames( path ) {
+	const filenames = fs.readdirSync(path);
+	const testFilenames = _.filter(filenames, function(filename){
+		return /^test/.test(filename);
+	});
+	return _.map(testFilenames, function(filename) {
+		return path.join(Config.TestDirectory, filename);
+	});
 }
 
-function saveResult( testResult ) {
-
+function getFileAsSuitesOfRunnables( filename ) {
+	var testSuites = [];
+  	const TestCollection = require(filename);
+  	for (var suite in TestCollection.tests) {
+  		testSuites.push(
+  			createRunnablesFromSuite(
+  				suite, TestCollection.tests[suite]))
+  	}
+  	return testSuites;
 }
 
-function makeTestIntoRunnable( name, test ) {
-	const runnable = function( done ) {
-		var testResult = {};
-		try {
-			testResult.timeStarted = Date.now();
-			test.execute(function(err, response) {
-				if (err) testResult.error = err;
-				testResult.response = response;
-				testResult.delay = Date.now() - testResult.timeStarted;
-			})
-		} catch(e) {
-			testResult.response = null;
-			testResult.delay = null;
-			testResult.error = e;
-		}
-		testResult.should = test.should;
-		testResult.name = name;
-
-		saveResult(testResult);
-
-		done(testResult);
-	}	
+function createRunnablesFromSuite(suiteName, testsObj) {
+	var runnables = [];
+	for (var test in testsObj) {
+		runnables.push(
+			createRunnableFromTest(
+				suiteName, test, testsObj[test]));
+	}
 }
 
-function getSuiteNames( testsObject ) {
-	return Object.keys(testsObject);
+function createRunnableFromTest(suiteName, testName, testObj) {
+	return function(done) {
+		//var testEvent = 
+		testObj.execute(function(error, response) {
+
+		})
+	};
 }
 
-function getTestNames( suiteObject ) {
-	return Object.keys(suiteObject);
-}
-
-
-
-
+function getCollection
 module.exports = function( conf ) {
 
-  this.suites = getTestCollections(Config.TestDirectory);
+  this.TestFilenames = readTestFilenames(Config.TestDirectory);
+  this.TestSuites = 
+  	_.map(this.TestFilenames, getFileAsSuitesOfRunnables)
 
 
   /* run them synchronously */
