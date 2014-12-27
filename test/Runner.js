@@ -3,53 +3,93 @@ const assert = require("assert"),
   _ = require('underscore'),
   fs = require("fs");
 
-suite('Runner',function() {
-  var Runner = null;
-  const sampleSuiteThatDoesNothing = {
-    'SomeEndpoint' : [
-      { 
-        'should' : 'have { some response }',
-        'execute' : function(done) {
-          const error = null,
-            response = '{ some response }';
+function assertAllElementsAre(array, type, msg) {
+  var allElementsMatch = true;
+  _.each(array, function(el) {
+    allElementsMatch |= el instanceof type;
+  })
+  assert.ok(allElementsMatch, msg);
+}
 
-          done( null, response )
-        }
-      } 
-    ]
-   };
+suite('Runner',function() {
+  var Runner,MockCollection,MockTestFile;
 
   setup(function() {
-    Runner = require(
-      path.join(__dirname, '../Runner/Runner.js'));
+      Runner = require(path.join(__dirname, '../Runner/Runner.js')),
+      MockCollection = path.join(__dirname, "./Mocks/MockCollection"),
+      MockTestFile = path.join(__dirname, './Mocks/MockTestFile.js');
   });
 
   suite('Unit Tests', function() {
-    test('Config: Should have valid TestDirectory',
+    test('Config: Should have valid CollectionDir',
      function(done) {
-      var stats = fs.statSync(Runner.config.TestDirectory);
+      var stats = fs.statSync(Runner.config.CollectionDir);
       assert.ok(stats.isDirectory(),
-        "TestDirectory should be a directory");
-      done()
+        "CollectionDir should be a directory");
+
+      done();
     }),
-    test('getTestCollections: Should return an array of arrays of test filenames',
+    test('getDirectories: Should return an array of directory names',
       function(done) {
         const suites = 
-          Runner.getTestCollections(Runner.config.TestDirectory);
+          Runner.getDirectories(Runner.config.CollectionDir);
 
         assert.ok(
           suites instanceof Array,
-          "getTestCollections should return an array");
+          "getDirectories should return an array of directory names");
 
-        _.each(suites,
-          function(suiteFiles) {
-            assert.ok(
-              suiteFiles instanceof Array);
-            _.each(suiteFiles, function(filename) {
-              assert.ok(/test/.test(filename),
-                "all test filenames should contain the word 'test' ");
-            })
-          });
+        assertAllElementsAre(suites, String,
+          "every directory name should be a string");
+
+        done();
+      }),
+    test('getTestFiles: should return an array of filename strings with "test" in them',
+      function(done) {
+        const filenames = 
+          Runner.getTestFiles(MockCollection);
+
+        assert.ok(
+          filenames instanceof Array,
+          "getTestFiles should return an array");
+
+        assertAllElementsAre(filenames, String, 
+          "every filename should be a string");
+
+        _.each(filenames, function(el) {
+          assert.ok(fs.statSync(el).isFile(),
+            "filename should be valid");
+        })
+
+        _.each(filenames, function(el) {
+          assert.ok(el.match(/test/), 
+            "getTestFiles should only return files with 'test' in the name")
+        });
+
+        done();
+      }),
+    test('getTestSuite: should return a testsuite object', 
+      function(done) {
+        const
+          expectedKeys = [
+            "name",
+            "tests"
+          ],
+          testSuite = Runner.getTestSuite(MockTestFile),
+          testSuiteKeys = Object.keys(testSuite);
+
+        assert.ok(expectedKeys.length == testSuiteKeys.length,
+          "testSuite has unexpected properties");
+
+        _.each(expectedKeys, function(key) {
+          assert.ok(testSuiteKeys.indexOf(key) >= 0,
+            "missing testsuite key:"+key+" in file "+MockTestFile);
+        });
+
+        done();
+      }),
+
+    test('executeTestSuite: should call the passed callback for every test', 
+      function(done) {
         done();
       })
   });

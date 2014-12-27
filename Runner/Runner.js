@@ -5,62 +5,51 @@ const
   fs = require('fs');
 
 var Config = {
-  "TestDirectory" : path.join(__dirname, '../Tests')
+  "CollectionDir" : path.join(__dirname, '../Collections')
 }
 
-function readTestFilenames( path ) {
-	const filenames = fs.readdirSync(path);
-	const testFilenames = _.filter(filenames, function(filename){
-		return /^test/.test(filename);
-	});
-	return _.map(testFilenames, function(filename) {
-		return path.join(Config.TestDirectory, filename);
-	});
-}
 
-function getFileAsSuitesOfRunnables( filename ) {
-	var testSuites = [];
-  	const TestCollection = require(filename);
-  	for (var suite in TestCollection.tests) {
-  		testSuites.push(
-  			createRunnablesFromSuite(
-  				suite, TestCollection.tests[suite]))
-  	}
-  	return testSuites;
-}
-
-function createRunnablesFromSuite(suiteName, testsObj) {
-	var runnables = [];
-	for (var test in testsObj) {
-		runnables.push(
-			createRunnableFromTest(
-				suiteName, test, testsObj[test]));
-	}
-}
-
-function createRunnableFromTest(suiteName, testName, testObj) {
-	return function(done) {
-		//var testEvent = 
-		testObj.execute(function(error, response) {
-
-		})
-	};
-}
-
-function getCollection
 module.exports = function( conf ) {
 
-  this.TestFilenames = readTestFilenames(Config.TestDirectory);
-  this.TestSuites = 
-  	_.map(this.TestFilenames, getFileAsSuitesOfRunnables)
 
+	for (var i in conf) {Config[i] = conf[i]};
 
-  /* run them synchronously */
+  	/* run everything synchronously */
+
+	/* expose functions to tests */
+}
+function getDirectories(directory) {
+	const allthings = fs.readdirSync(directory);
+	const completedpaths = _.map(allthings,function(fileordir) {
+		return path.join(directory,fileordir);
+	})
+	return _.filter(completedpaths, function(fileordir) {
+		return fs.statSync(fileordir).isDirectory();
+	});
+}
+function getTestFiles(directory) {
+	const allfiles = fs.readdirSync(directory);
+	const completedpaths = _.map(allfiles, function(file) {
+		return path.join(directory, file);
+	})
+	return _.filter(completedpaths, function(file) {
+		return 
+			fs.statSync(file).isFile() &&
+			file.match(/test/);
+	})
+}
+function getTestSuite(filename) {
+	return require(filename).suite;
+}
+function executeTest(collectionName, suiteName, test) {
 
 }
+function executeTestSuite(testSuite) {}
+
 if (module.parent && 
 	module.parent.id.match(/test/)) {
-  module.exports.config = Config;
-  module.exports.getTestCollections = getTestCollections;
-  // module.exports.readSuiteIntoRunnables = readSuiteIntoRunnables;
+	module.exports.getDirectories = getDirectories;
+	module.exports.getTestFiles = getTestFiles;
+	module.exports.getTestSuite = getTestSuite;
+	module.exports.config = Config;
 }
