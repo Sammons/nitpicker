@@ -1,7 +1,8 @@
 const assert = require("assert"),
   path = require("path"),
   _ = require('underscore'),
-  fs = require("fs");
+  fs = require("fs"),
+  async = require('async');
 
 function assertAllElementsAre(array, type, msg) {
   var allElementsMatch = true;
@@ -88,14 +89,30 @@ suite('Runner',function() {
         done();
       }),
 
-    test('executeTestSuite: should call the passed callback for every test', 
+    test('executeTestSuite: should call the callback after running every test', 
       function(done) {
-        done();
+        var counter = 0;
+        function count() {counter++}
+        const sampleSuite = {
+          name : 'testsuite',
+          tests : {
+            'test1' : function(tdone) { count();setTimeout(tdone, 1)},
+            'test2' : function(tdone) { count();setTimeout(tdone, 2)},
+            'test3' : function(tdone) { count();setTimeout(tdone, 3)},
+            'test4' : function(tdone) { count();setTimeout(tdone, 5)},
+            'test5' : function(tdone) { count();setTimeout(tdone, 7)}
+          }
+        }
+
+        Runner.executeTestSuite(sampleSuite, 
+          function() {
+            assert.ok(counter == Object.keys(sampleSuite.tests).length,
+              "every test should finish once totalling "+Object.keys(sampleSuite.tests).length
+              +", instead of "+counter+" times");
+            done();
+          });
       })
   });
 
-  teardown(function() {
-
-  });
 })
 
