@@ -19,12 +19,14 @@ function initializeSchema(database) {
 		"startTime" : Number,
 		"endTime" : Number,
 		"duration" : Number,
+		"collectionName" : String,
 		"response" : {},
 		"error" : String
 	});
 
-	ApiResponseEventSchema.method('begin', function(suiteName, testName, testShould) {
+	ApiResponseEventSchema.method('begin', function(collectionName, suiteName, testName, testShould) {
 		var ev = this;
+		ev.collectionName = collectionName;
 		ev.suiteName = suiteName;
 		ev.testName = testName;
 		ev.should = testShould;

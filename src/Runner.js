@@ -27,6 +27,7 @@ module.exports.run = function( conf, eventCb ) {
   		if (testFiles.length == 0) return;
   		async.eachSeries(testFiles, function(file, next) {
   			executeTestSuite(
+  				getDirnameFromPath(dir),
   				getTestSuite(file),
   				next);
   		});
@@ -57,15 +58,14 @@ function getTestSuite(filename) {
 	return require(filename).suite;
 }
 
-function executeTestSuite(testSuite, callback) {
+function executeTestSuite(collectionName, testSuite, callback) {
 	const testNames = Object.keys(testSuite.tests);
 	var i = -1;
 	const doRun = function(next) {
 		const curTest = testSuite.tests[testNames[i]];
 		var e = new ApiResponseEvent();
 		try {
-			console.log(testSuite.name, testNames[i], curTest.should)
-			e.begin(testSuite.name, testNames[i], curTest.should);
+			e.begin(collectionName, testSuite.name, testNames[i], curTest.should);
 			curTest.test(function(err, result) {
 				e.end(err, result);
 				if (onEventCompletedCb) {
@@ -87,6 +87,10 @@ function executeTestSuite(testSuite, callback) {
 
 	}
 	next();
+}
+
+function getDirnameFromPath(fulldirpath) {
+	return fulldirpath.match(/^.*\\(.*?)$/)[1];
 }
 
 if (module.parent && 
