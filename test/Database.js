@@ -5,9 +5,9 @@ const assert = require("assert"),
   suite('Database', function() {
   var db, ApiResponseEvent;
   setup(function() {
-     db = require('../Data/Database.js');
+     db = require('../src/Data/Database.js');
      db.connect();
-     ApiResponseEvent = require('../Data/ApiResponseEvent.js')(db);
+     ApiResponseEvent = require('../src/Data/ApiResponseEvent.js')(db);
   });
   suite('Integration Tests', function() {
   	test('Should be able to connect', function(done) {

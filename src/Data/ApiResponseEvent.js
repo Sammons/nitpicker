@@ -15,6 +15,7 @@ function initializeSchema(database) {
 	var ApiResponseEventSchema = new Schema({ 
 		"suiteName" : String,
 		"testName" : String,
+		"should" : String,
 		"startTime" : Number,
 		"endTime" : Number,
 		"duration" : Number,
@@ -23,20 +24,22 @@ function initializeSchema(database) {
 	});
 
 	ApiResponseEventSchema.method('begin', function(suiteName, testName, testShould) {
-		var event = this;
-		this.suiteName = suiteName;
-		this.testName = testName;
-		this.testShould = testShould;
-		this.startTime = Date.now();
+		var ev = this;
+		ev.suiteName = suiteName;
+		ev.testName = testName;
+		ev.should = testShould;
+		ev.startTime = Date.now();
 	})
 
 	ApiResponseEventSchema.method('end', function(error, response, cb) {
-		this.error = error.toString();
-		this.response = response;
-		this.endTime = Date.now();
-		this.duration = this.endTime - this.startTime;
-		this.markModified('response');
-		this.save(cb);
+		var ev = this;
+		if (error)
+			{ev.error = error.toString();}
+		ev.response = response;
+		ev.endTime = Date.now();
+		ev.duration = ev.endTime - ev.startTime;
+		ev.markModified('response');
+		ev.save(cb);
 	})
 
 	database.ApiResponseEvent = mongoose.model('ApiResponseEvent', ApiResponseEventSchema);

@@ -16,7 +16,7 @@ suite('Runner',function() {
   var Runner,MockCollection,MockTestFile;
 
   setup(function() {
-      Runner = require(path.join(__dirname, '../Runner/Runner.js')),
+      Runner = require(path.join(__dirname, '../src/Runner.js')),
       MockCollection = path.join(__dirname, "./Mocks/MockCollection"),
       MockTestFile = path.join(__dirname, './Mocks/MockTestFile.js');
   });
@@ -111,6 +111,14 @@ suite('Runner',function() {
               +", instead of "+counter+" times");
             done();
           });
+      }),
+    test('run: every completed event should call onEventCompletedCb',
+      function(done) {
+        Runner.run({ 
+          CollectionDir: path.join(__dirname)
+        }, function(event) {
+          done();
+        })
       })
   });
 

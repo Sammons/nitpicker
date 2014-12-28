@@ -1,5 +1,5 @@
 var mongoose = require('mongoose'),
-conf = require('../config.js');
+conf = require('../../config.js');
 
 function connect(connectionstring) {
 	const dbpath = connectionstring || conf.database;

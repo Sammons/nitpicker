@@ -3,10 +3,10 @@ var keys = require('./keys.js');
 var dwolla = require('dwolla-node')(keys.appKey, keys.appSecret);
 
 module.exports.suite = {
-	suiteName : 'Dwolla Sandbox',
+	name : 'Dwolla Sandbox',
 	tests: {
 		"Balance" : {
-			should: 'Request is successful and response is valid',
+			should: 'Balance check',
 			test : 
 				function(done) {
 					dwolla.setToken(keys.accessToken);
@@ -14,7 +14,7 @@ module.exports.suite = {
 				}
 		},
 		"Send Money" : {
-			should: 'Request is successful and response is valid',
+			should: 'Send 1 cent to a merchant account',
 			test :
 				function(done) {
 					dwolla.setToken(keys.accessToken);
@@ -22,7 +22,7 @@ module.exports.suite = {
 				}
 		},
 		"Basic Account Info" : {
-			should: 'Request is successful and response is valid',
+			should: 'Get basic account information on gordon',
 			test :
 				function(done) {
 					dwolla.setToken(keys.accessToken);
@@ -30,7 +30,7 @@ module.exports.suite = {
 				}
 		},
 		"Full Account Info" : {
-			should: 'Request is successful and response is valid',
+			should: 'Get all account information available for this access token',
 			test: 
 				function(done) {
 					dwolla.setToken(keys.accessToken);

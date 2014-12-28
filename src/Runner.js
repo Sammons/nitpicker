@@ -3,18 +3,23 @@ const
   _ = require('underscore'),
   async = require('async'),
   fs = require('fs'),
-  Database = require('../Data/Database.js'),
-  ApiResponseEvent = require('../Data/ApiResponseEvent.js')(Database);
+  Database = require('./Data/Database.js'),
+  ApiResponseEvent = require('./Data/ApiResponseEvent.js')(Database);
 
 var Config = {
   "CollectionDir" : path.join(__dirname, '../Collections')
 }
 
-module.exports.run = function( conf ) {
+var onEventCompletedCb = null;
 
-	if (conf)
+module.exports.run = function( conf, eventCb ) {
+	if (conf) {
 		for (var i in conf) {Config[i] = conf[i]};
+	}
 
+	if (eventCb) {
+		onEventCompletedCb = eventCb;
+	}
   	/* run everything synchronously */
   	const dirs = getDirectories(Config.CollectionDir);
   	_.each(dirs, function(dir) {
@@ -28,7 +33,6 @@ module.exports.run = function( conf ) {
   	});
 }
 function getDirectories(directory) {
-	console.log('getting directories in', directory);
 	const allthings = fs.readdirSync(directory);
 	const completedpaths = _.map(allthings,function(fileordir) {
 		return path.join(directory,fileordir);
@@ -38,11 +42,10 @@ function getDirectories(directory) {
 	});
 }
 function getTestFiles(directory) {
-	console.log('getting files in', directory);
 	const allfiles = fs.readdirSync(directory);
 	const filteredfiles = _.filter(allfiles, 
 		function(file) {
-			return file.match(/test/);
+			return file.match(/test/i);
 		});
 	const completedpaths = _.map(filteredfiles, 
 		function(file) {
@@ -51,23 +54,23 @@ function getTestFiles(directory) {
 	return completedpaths;
 }
 function getTestSuite(filename) {
-	console.log('getting test suite in', filename)
 	return require(filename).suite;
 }
 
 function executeTestSuite(testSuite, callback) {
-	console.log('executing test suite', testSuite.name)
 	const testNames = Object.keys(testSuite.tests);
 	var i = -1;
 	const doRun = function(next) {
 		const curTest = testSuite.tests[testNames[i]];
-		console.log('running test: '+testNames[i],'should',curTest.should);
 		var e = new ApiResponseEvent();
 		try {
+			console.log(testSuite.name, testNames[i], curTest.should)
 			e.begin(testSuite.name, testNames[i], curTest.should);
 			curTest.test(function(err, result) {
 				e.end(err, result);
-				console.log(testNames[i], 'finished in ',e.duration,'ms');
+				if (onEventCompletedCb) {
+					onEventCompletedCb(e)
+				}
 				next();
 			})
 		} catch (err) {

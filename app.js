@@ -1,4 +1,8 @@
-const Runner = require('./Runner/Runner.js');
+const Runner = require('./src/Runner.js');
 
-Runner.run();
-console.log('runner started')
+Runner.run({}, function(ev) {
+	console.log(
+		ev
+		)
+});
+console.log('runner started');
