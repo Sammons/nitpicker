@@ -1,7 +1,8 @@
-var mongoose = require('mongoose');
+var mongoose = require('mongoose'),
+conf = require('../config.js');
 
-function connect() {
-	const dbpath = 'mongodb://localhost/nitpicker';
+function connect(connectionstring) {
+	const dbpath = connectionstring || conf.database;
 	if (!mongoose.connection) {
 		mongoose.connection = 
 			mongoose.createConnection(dbpath);

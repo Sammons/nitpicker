@@ -1,8 +1,6 @@
 const assert = require("assert"),
   path = require("path"),
-  _ = require('underscore'),
-  fs = require("fs"),
-  async = require('async');
+  conf = require('../config.js');
 
   suite('Database', function() {
   var db, ApiResponseEvent;
@@ -11,8 +9,6 @@ const assert = require("assert"),
      db.connect();
      ApiResponseEvent = require('../Data/ApiResponseEvent.js')(db);
   });
-
-
   suite('Integration Tests', function() {
   	test('Should be able to connect', function(done) {
   		var connection = db.connect();
@@ -49,13 +45,14 @@ const assert = require("assert"),
       testEvent.begin('testSuite', 'testName');
       setTimeout(function(){
         testEvent.end(null, '{}');
-        assert.ok(testEvent.response && testEvent.startTime && testEvent.duration, 
-          "end should have set response, startTime, and duration");
           setTimeout(function(){
             ApiResponseEvent.findById(testEvent._id,
               function(err, ev) {
+                assert.ok(ev.response && ev.endTime && ev.duration, 
+                "end should have set response, startTime, and duration");
                 if (err) assert.fail(null, null, "should have been no error finding event");
                 done();
+                ev.remove();
               })
           },10)
       },10)
