@@ -96,11 +96,11 @@ suite('Runner',function() {
         const sampleSuite = {
           name : 'testsuite',
           tests : {
-            'test1' : function(tdone) { count();setTimeout(tdone, 1)},
-            'test2' : function(tdone) { count();setTimeout(tdone, 2)},
-            'test3' : function(tdone) { count();setTimeout(tdone, 3)},
-            'test4' : function(tdone) { count();setTimeout(tdone, 5)},
-            'test5' : function(tdone) { count();setTimeout(tdone, 7)}
+            'test1' : { 'test': function(tdone) { count();setTimeout(tdone, 1)}, 'should' :'test'},
+            'test2' : { 'test': function(tdone) { count();setTimeout(tdone, 2)}, 'should' :'test'},
+            'test3' : { 'test': function(tdone) { count();setTimeout(tdone, 3)}, 'should' :'test'},
+            'test4' : { 'test': function(tdone) { count();setTimeout(tdone, 5)}, 'should' :'test'},
+            'test5' : { 'test': function(tdone) { count();setTimeout(tdone, 7)}, 'should' :'test'}
           }
         }
 
